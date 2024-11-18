@@ -1,0 +1,39 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and uploader
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+*storybook.log
+
+# Copied uploader
+index.html
+src/global.api.d.ts
+src/config.tsx
+src/assets/logo/*
+src/styles/variables.css
+src/styles/overwrite.css
+src/mocks/*
+src/dialogs/*
+public/favicon/*
+public/files/*
+public/docs/*
