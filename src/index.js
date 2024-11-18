@@ -5,12 +5,11 @@ const { defaultTo, get } = require("lodash");
 const stripe = require("stripe")(defaultTo(process.env.SECRET_KEY, ""));
 
 const app = express();
+const PORT = defaultTo(process.env.PORT, 3000);
 
 app.use(cors());
 app.use(express.static("public"));
 app.use(express.json());
-
-const PORT = process.env.PORT || 3000;
 
 const createPaymentIntent = async (data, customer) => {
   const customerId = defaultTo(customer.id, "");
