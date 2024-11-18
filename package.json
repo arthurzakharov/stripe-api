@@ -1,10 +1,10 @@
 {
-  "name": "stripe",
+  "name": "stripe-api",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
-    "start": "node dist/index.js",
-    "dev": "nodemon"
+    "start": "nodemon ./src/index.js"
   },
   "keywords": [],
   "author": "",
@@ -18,11 +18,6 @@
     "stripe": "^17.2.1"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/express": "^5.0.0",
-    "@types/node": "^22.7.8",
-    "nodemon": "^3.1.7",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.6.3"
+    "nodemon": "^3.1.7"
   }
 }
