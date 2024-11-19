@@ -1,7 +1,10 @@
 services:
-  stripe-api:
-    build: .
-    container_name: stripe-api
+  development:
+    build:
+      context: .
+      args:
+        NODE_ENV: development
+    container_name: stripe-api-dev
     ports:
       - "9000:${PORT}"
     restart: always
@@ -11,4 +14,4 @@ services:
     environment:
       PORT: ${PORT}
       SECRET_KEY: ${SECRET_KEY}
-    command: npm start
+    command: npm run start:dev

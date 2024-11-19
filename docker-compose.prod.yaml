@@ -1,0 +1,14 @@
+services:
+  production:
+    build:
+      context: .
+      args:
+        NODE_ENV: production
+    container_name: stripe-api-prod
+    ports:
+      - "9000:${PORT}"
+    restart: always
+    environment:
+      PORT: ${PORT}
+      SECRET_KEY: ${SECRET_KEY}
+    command: npm run start:prod
