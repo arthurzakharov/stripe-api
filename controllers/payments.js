@@ -1,7 +1,8 @@
-const { CREATED, OK, BAD_REQUEST } = require('http-status-codes');
+const { CREATED, OK, BAD_REQUEST, NO_CONTENT } = require('http-status-codes');
 const { get } = require('lodash');
 const customerModel = require('#customer-model');
 const paymentIntentModel = require('#payment-intent-model');
+const { inCent, inEuro } = require('#money-util');
 
 const create = async (req, res) => {
   const amount = get(req, 'body.payment.amount', 0);
@@ -49,9 +50,49 @@ const create = async (req, res) => {
   }
 };
 
+/**
+ * Look for PaymentIntent by id and if price changed create new PaymentIntent for same Customer if
+ * price is not changed return found PaymentIntent. If not PaymentIntent found return 404
+ * @param {e.Request<{}, {}, {}, {id:string,amount:string}>} req
+ * @param res
+ * @returns {Promise<void>}
+ */
+const getPaymentIntentOrCreateNewIfAmountIsDifferent = async (req, res) => {
+  const id = get(req, 'query.id', '');
+  const amount = parseInt(get(req, 'query.amount', ''));
+  try {
+    const paymentIntent = await paymentIntentModel.findByPaymentIntentId(id);
+    if (paymentIntent) {
+      if (paymentIntent.amount === inCent(amount)) {
+        console.log(`Get PaymentIntent ${paymentIntent.id} - ${amount} EUR.`);
+        res.status(OK).json(paymentIntent);
+      } else {
+        const paymentIntentForNewAmount = await paymentIntentModel.create({
+          amount,
+          customerId: get(paymentIntent, 'customer', ''),
+          customerEmail: get(paymentIntent, 'receipt_email', ''),
+          paymentMethodTypes: get(paymentIntent, 'payment_method_types', []),
+          clientReferenceId: get(paymentIntent, 'metadata.client_reference_id', ''),
+          productId: get(paymentIntent, 'metadata.product_id', ''),
+        });
+        console.log(`Price for Customer ${paymentIntent.customer} changed: ${inEuro(paymentIntent.amount)} EUR -> ${amount} EUR`);
+        res.status(CREATED).json(paymentIntentForNewAmount);
+      }
+    } else {
+      console.log(`PaymentIntent ${id} is not found`);
+      res.status(NO_CONTENT).end();
+    }
+  } catch (e) {
+    res.status(BAD_REQUEST).json({
+      message: 'Fail on get PaymentIntent',
+      error: get(e, 'message', ''),
+    });
+  }
+};
+
 const updateMethodTypes = async (req, res) => {
   const id = get(req, 'body.id', '');
-  const paymentMethodTypes = get(req, 'body.paymentMethodTypes', []);
+  const paymentMethodTypes = get(req, 'body.types', []);
   try {
     const paymentIntent = await paymentIntentModel.updatePaymentMethodTypes(id, paymentMethodTypes);
     res.status(OK).json(paymentIntent);
@@ -65,5 +106,6 @@ const updateMethodTypes = async (req, res) => {
 
 module.exports = {
   create,
+  getPaymentIntentOrCreateNewIfAmountIsDifferent,
   updateMethodTypes,
 };
