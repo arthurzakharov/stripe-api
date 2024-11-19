@@ -1,0 +1,104 @@
+{
+	"info": {
+		"_postman_id": "6cfc2998-b9a0-4520-96af-453bd6d5e457",
+		"name": "StripeApi",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "17873453"
+	},
+	"item": [
+		{
+			"name": "Create PaymentIntent",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"payment\": {\n        \"amount\": 100,\n        \"paymentMethodTypes\": [\"card\", \"paypal\", \"klarna\"],\n        \"productId\": \"prod-1\"\n    },\n    \"customer\": {\n        \"clientReferenceId\": \"PEX2b2d08ac-003\",\n        \"name\": \"Vera Zakharova\",\n        \"email\": \"zakharova.vera@legal.one\",\n        \"address\": {\n            \"city\": \"Dresden\",\n            \"country\": \"Germany\",\n            \"line1\": \"Marienstr. 7\",\n            \"line2\": \"\",\n            \"postalCode\": \"01067\",\n            \"state\": \"Sachsen\"\n        }\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3333/payments",
+					"host": [
+						"localhost"
+					],
+					"port": "3333",
+					"path": [
+						"payments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get PaymentIntent by id or create new if price is different",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"payment\": {\n        \"amount\": 100,\n        \"paymentMethodTypes\": [\"card\", \"paypal\", \"klarna\"],\n        \"productId\": \"prod-1\"\n    },\n    \"customer\": {\n        \"clientReferenceId\": \"PEX2b2d08ac-003\",\n        \"name\": \"Vera Zakharova\",\n        \"email\": \"zakharova.vera@legal.one\",\n        \"address\": {\n            \"city\": \"Dresden\",\n            \"country\": \"Germany\",\n            \"line1\": \"Marienstr. 7\",\n            \"line2\": \"\",\n            \"postalCode\": \"01067\",\n            \"state\": \"Sachsen\"\n        }\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3333/payments?id=pi_3QMqGNCvDTCbY5qu0aq4EvAp&amount=500",
+					"host": [
+						"localhost"
+					],
+					"port": "3333",
+					"path": [
+						"payments"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "pi_3QMqGNCvDTCbY5qu0aq4EvAp"
+						},
+						{
+							"key": "amount",
+							"value": "500"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update PaymentIntent payment_method_types",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"pi_3QMoW7CvDTCbY5qu1gXwh9xo\",\n    \"types\": [\"card\", \"paypal\"]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3333/payments",
+					"host": [
+						"localhost"
+					],
+					"port": "3333",
+					"path": [
+						"payments"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
