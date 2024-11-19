@@ -1,5 +1,5 @@
 const { paymentIntents } = require('#stripe-util');
-const { get } = require('lodash');
+const { get, defaultTo } = require('lodash');
 const { inCent } = require('#money-util');
 
 /**
@@ -38,6 +38,27 @@ const create = async (payload) => {
 };
 
 /**
+ * Find PaymentIntent by id and update its payment_method_types.
+ * @param {string} id - PaymentIntent id.
+ * @param paymentMethodTypes - PaymentIntent payment method types.
+ * @returns {Promise<Stripe.PaymentIntent>}
+ */
+const updatePaymentMethodTypes = async (id, paymentMethodTypes) => {
+  try {
+    return await paymentIntents
+      .update(id, {
+        payment_method_types: defaultTo(paymentMethodTypes, ['cards']),
+      })
+      .then((paymentIntent) => {
+        console.log(`Update PaymentIntent ${paymentIntent.id} payment_method_types to [${paymentMethodTypes}]`);
+        return paymentIntent;
+      });
+  } catch (e) {
+    throw new Error(get(e, 'message', ''));
+  }
+};
+
+/**
  * TODO: Method is not currently used
  * Get PaymentIntent by its id or null
  * @param {string} id - PaymentIntent id
@@ -53,5 +74,6 @@ const findByPaymentIntentId = async (id) => {
 
 module.exports = {
   create,
+  updatePaymentMethodTypes,
   findByPaymentIntentId,
 };

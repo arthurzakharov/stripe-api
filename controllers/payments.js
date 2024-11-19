@@ -37,7 +37,7 @@ const create = async (req, res) => {
       customerId: get(customer, 'id', ''),
       customerEmail: get(customer, 'email', ''),
       paymentMethodTypes,
-      clientReferenceId: get(customer, 'meta.client_reference_id', ''),
+      clientReferenceId: get(customer, 'description', ''),
       productId,
     });
     res.status(CREATED).json(paymentIntent);
@@ -50,9 +50,17 @@ const create = async (req, res) => {
 };
 
 const updateMethodTypes = async (req, res) => {
-  res.status(OK).send({
-    status: 'success',
-  });
+  const id = get(req, 'body.id', '');
+  const paymentMethodTypes = get(req, 'body.paymentMethodTypes', []);
+  try {
+    const paymentIntent = await paymentIntentModel.updatePaymentMethodTypes(id, paymentMethodTypes);
+    res.status(OK).json(paymentIntent);
+  } catch (e) {
+    res.status(BAD_REQUEST).json({
+      message: "Failed to update PaymentIntent' payment_method_types",
+      error: get(e, 'message', ''),
+    });
+  }
 };
 
 module.exports = {
