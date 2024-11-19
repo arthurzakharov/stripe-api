@@ -1,23 +1,33 @@
 {
   "name": "stripe-api",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "type": "commonjs",
   "scripts": {
-    "start": "nodemon ./src/index.js"
+    "start": "nodemon server.js"
   },
-  "keywords": [],
-  "author": "",
+  "imports": {
+    "#env": "./utils/env.js",
+    "#stripe-util": "./utils/stripe.js",
+    "#money-util": "./utils/money.js",
+    "#payments-controllers": "./controllers/payments.js",
+    "#customer-model": "./models/customer.js",
+    "#payment-intent-model": "./models/payment-intent.js",
+    "#payments-routes": "./routes/payments.js"
+  },
+  "author": "arthurzakharov",
   "license": "ISC",
   "description": "",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "http-status-codes": "^2.3.0",
     "lodash": "^4.17.21",
     "stripe": "^17.2.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.7"
+    "nodemon": "^3.1.7",
+    "prettier": "3.3.3"
   }
 }
