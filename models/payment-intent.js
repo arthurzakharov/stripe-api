@@ -59,7 +59,6 @@ const updatePaymentMethodTypes = async (id, paymentMethodTypes) => {
 };
 
 /**
- * TODO: Method is not currently used
  * Get PaymentIntent by its id or null
  * @param {string} id - PaymentIntent id
  * @returns {Promise<Stripe.PaymentIntent|null>}

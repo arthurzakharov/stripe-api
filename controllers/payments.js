@@ -4,6 +4,10 @@ const customerModel = require('#customer-model');
 const paymentIntentModel = require('#payment-intent-model');
 const { inCent, inEuro } = require('#money-util');
 
+/**
+ * Create new PaymentIntent and Customer. If customer with such clientReferenceId
+ * already exists reuse it to create new PaymentIntent
+ */
 const create = async (req, res) => {
   const amount = get(req, 'body.payment.amount', 0);
   const paymentMethodTypes = get(req, 'body.payment.paymentMethodTypes', []);
@@ -53,9 +57,6 @@ const create = async (req, res) => {
 /**
  * Look for PaymentIntent by id and if price changed create new PaymentIntent for same Customer if
  * price is not changed return found PaymentIntent. If not PaymentIntent found return 404
- * @param {e.Request<{}, {}, {}, {id:string,amount:string}>} req
- * @param res
- * @returns {Promise<void>}
  */
 const getPaymentIntentOrCreateNewIfAmountIsDifferent = async (req, res) => {
   const id = get(req, 'query.id', '');
@@ -67,6 +68,12 @@ const getPaymentIntentOrCreateNewIfAmountIsDifferent = async (req, res) => {
         console.log(`Get PaymentIntent ${paymentIntent.id} - ${amount} EUR.`);
         res.status(OK).json(paymentIntent);
       } else {
+        /**
+         * TODO: Possible logic update
+         * 1. It can happen so that we have several PaymentIntents for same Customer with same amount.
+         * Should we cancel such PaymentIntents?
+         * 2. Should we cancel previous PaymentIntent if price is changed?
+         */
         const paymentIntentForNewAmount = await paymentIntentModel.create({
           amount,
           customerId: get(paymentIntent, 'customer', ''),
@@ -90,6 +97,9 @@ const getPaymentIntentOrCreateNewIfAmountIsDifferent = async (req, res) => {
   }
 };
 
+/**
+ * Update PaymentIntents payment_method_types. Find PaymentIntent by id and update it
+ */
 const updateMethodTypes = async (req, res) => {
   const id = get(req, 'body.id', '');
   const paymentMethodTypes = get(req, 'body.types', []);
