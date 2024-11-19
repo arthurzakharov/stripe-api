@@ -1,0 +1,15 @@
+services:
+
+  image:
+    build: .
+    container_name: stipe-api
+    ports:
+      - "9000:3000"
+    restart: always
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      PORT: 3000
+      SECRET_KEY: sk_test_51QLN6GCvDTCbY5qu4e5OJkp1kC6shye8bIMmbH8wnurKKOD0USVkNQN0LeswdsKypkvPuLF1a4rXoA1gp6kiiKcf000djoMwyj
+    command: npm start
