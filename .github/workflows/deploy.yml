@@ -3,7 +3,7 @@ name: Deploy to Render on Tag
 on:
   push:
     tags:
-      - '*'
+      - 'v*'
 
 jobs:
   deploy:
@@ -26,3 +26,6 @@ jobs:
         with:
           service-id: ${{ secrets.RENDER_SERVICE_ID }}
           api-key: ${{ secrets.RENDER_API_KEY }}
+
+      - name: Log Deployment Trigger
+        run: echo "Render deployment triggered for service ${{ secrets.RENDER_SERVICE_ID }}"
