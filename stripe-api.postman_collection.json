@@ -13,7 +13,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"payment\": {\n        \"amount\": 100,\n        \"paymentMethodTypes\": [\"card\", \"paypal\", \"klarna\"],\n        \"productId\": \"prod-1\"\n    },\n    \"customer\": {\n        \"clientReferenceId\": \"PEX2b2d08ac-003\",\n        \"name\": \"Vera Zakharova\",\n        \"email\": \"zakharova.vera@legal.one\",\n        \"address\": {\n            \"city\": \"Dresden\",\n            \"country\": \"Germany\",\n            \"line1\": \"Marienstr. 7\",\n            \"line2\": \"\",\n            \"postalCode\": \"01067\",\n            \"state\": \"Sachsen\"\n        }\n    }\n}",
+					"raw": "{\n    \"payment\": {\n        \"amount\": 3300,\n        \"paymentMethodTypes\": [\"card\", \"paypal\", \"klarna\"],\n        \"productId\": \"prod-1\"\n    },\n    \"customer\": {\n        \"clientReferenceId\": \"PEX2b2d08ac-009\",\n        \"name\": \"Jesica Zakharova\",\n        \"email\": \"zakharova.jesica@legal.one\",\n        \"address\": {\n            \"city\": \"Dresden\",\n            \"country\": \"Germany\",\n            \"line1\": \"Marienstr. 7\",\n            \"line2\": \"\",\n            \"postalCode\": \"01067\",\n            \"state\": \"Sachsen\"\n        }\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -21,11 +21,11 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:3333/payments",
+					"raw": "localhost:9000/payments",
 					"host": [
 						"localhost"
 					],
-					"port": "3333",
+					"port": "9000",
 					"path": [
 						"payments"
 					]
