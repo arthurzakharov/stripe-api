@@ -1,7 +1,8 @@
 node_modules
 *.log
 .dockerignore
-Dockerfile
+Dockerfile.dev
+Dockerfile.prod
 docker-compose.yml
 .env
 npm-debug.log

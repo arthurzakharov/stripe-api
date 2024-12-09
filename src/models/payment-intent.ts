@@ -1,19 +1,17 @@
-const { paymentIntents } = require('#stripe-util');
-const { get, defaultTo } = require('lodash');
-const { inCent } = require('#money-util');
+import { paymentIntents } from '../utils/stripe';
+import { get, defaultTo } from 'lodash';
+import { inCent } from '../utils/money';
 
-/**
- * Create new PaymentIntent in EUR only.
- * @param {Object} payload - data to create PaymentIntent.
- * @param {number} payload.amount - price in EUR not in cents.
- * @param {string} payload.customerId - customer id to associate with PaymentIntent.
- * @param {string} payload.customerEmail - customer email to associate with PaymentIntent.
- * @param {('card'|'klarna'|'paypal')[]} payload.paymentMethodTypes - payment method types.
- * @param {string} payload.clientReferenceId - clientReferenceId.
- * @param {string} payload.productId - productId.
- * @returns {Promise<Stripe.PaymentIntent>}
- */
-const create = async (payload) => {
+// Create new PaymentIntent in EUR only.
+type CreatePaymentIntentPayload = {
+  amount: number;
+  customerId: string;
+  customerEmail: string;
+  paymentMethodTypes: string[];
+  clientReferenceId: string;
+  productId: string;
+};
+const create = async (payload: CreatePaymentIntentPayload) => {
   try {
     return await paymentIntents
       .create({
@@ -43,7 +41,7 @@ const create = async (payload) => {
  * @param paymentMethodTypes - PaymentIntent payment method types.
  * @returns {Promise<Stripe.PaymentIntent>}
  */
-const updatePaymentMethodTypes = async (id, paymentMethodTypes) => {
+const updatePaymentMethodTypes = async (id: string, paymentMethodTypes: string[]) => {
   try {
     return await paymentIntents
       .update(id, {
@@ -63,7 +61,7 @@ const updatePaymentMethodTypes = async (id, paymentMethodTypes) => {
  * @param {string} id - PaymentIntent id
  * @returns {Promise<Stripe.PaymentIntent|null>}
  */
-const findByPaymentIntentId = async (id) => {
+const findByPaymentIntentId = async (id: string) => {
   try {
     return await paymentIntents.retrieve(id);
   } catch (e) {
@@ -71,7 +69,7 @@ const findByPaymentIntentId = async (id) => {
   }
 };
 
-module.exports = {
+export default {
   create,
   updatePaymentMethodTypes,
   findByPaymentIntentId,

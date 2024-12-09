@@ -2,16 +2,17 @@ services:
   development:
     build:
       context: .
+      dockerfile: Dockerfile.dev
       args:
         NODE_ENV: development
     container_name: stripe-api-dev
     ports:
-      - "9000:${PORT}"
+      - "${PORT_OUT}:${PORT_IN}"
     restart: always
     volumes:
       - .:/app
       - /app/node_modules
     environment:
-      PORT: ${PORT}
+      PORT: ${PORT_IN}
       SECRET_KEY: ${SECRET_KEY}
     command: npm run start:dev

@@ -3,7 +3,7 @@ LABEL authors="arthurzakharov"
 WORKDIR /app
 COPY package*.json ./
 ARG NODE_ENV=production
-RUN if [ "$NODE_ENV" = "development" ]; then npm install; else npm ci --production; fi
+RUN npm install
 COPY . .
 EXPOSE 3000
-CMD ["node", "server.js"]
+CMD ["node", "./src/server.ts"]
