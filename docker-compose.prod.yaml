@@ -2,13 +2,17 @@ services:
   production:
     build:
       context: .
+      dockerfile: Dockerfile.prod
       args:
         NODE_ENV: production
-    container_name: stripe-api-prod
+    container_name: stripe-api-production
     ports:
-      - "9000:${PORT}"
+      - '${PORT_OUT}:${PORT_IN}'
     restart: always
+    volumes:
+      - .:/app
+      - /app/node_modules
     environment:
-      PORT: ${PORT}
+      PORT: ${PORT_IN}
       SECRET_KEY: ${SECRET_KEY}
-    command: npm run start:prod
+    command: ['npm', 'run', 'start:prod']
