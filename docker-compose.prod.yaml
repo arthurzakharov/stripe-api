@@ -1,11 +1,11 @@
 services:
-  development:
+  production:
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.prod
       args:
-        NODE_ENV: development
-    container_name: stripe-api-development
+        NODE_ENV: production
+    container_name: stripe-api-production
     ports:
       - '${PORT_OUT}:${PORT_IN}'
     restart: always
@@ -15,4 +15,4 @@ services:
     environment:
       PORT: ${PORT_IN}
       SECRET_KEY: ${SECRET_KEY}
-    command: ['npm', 'run', 'start:dev']
+    command: ['npm', 'run', 'start:prod']

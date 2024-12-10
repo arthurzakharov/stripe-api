@@ -1,40 +1,25 @@
-import { get, defaultTo } from 'lodash';
-import { customers } from '../utils/stripe';
-
-export type CreateCustomerPayload = {
-  clientReferenceId: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: {
-    city: string;
-    country: string;
-    line1: string;
-    line2: string;
-    postalCode: string;
-    state: string;
-  };
-};
+import { customers } from '@utils/stripe';
+import { type CustomerType } from '@utils/types';
 
 // Create new Customer
-const create = async (payload: CreateCustomerPayload) => {
+const create = async (customer: CustomerType) => {
   try {
     return await customers
       .create({
-        name: get(payload, 'name', ''),
-        email: get(payload, 'email', ''),
-        phone: get(payload, 'phone', ''),
-        description: get(payload, 'clientReferenceId', ''),
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone,
+        description: customer.clientReferenceId,
         address: {
-          city: get(payload, 'address.city', ''),
-          country: get(payload, 'address.country', ''),
-          line1: get(payload, 'address.line1', ''),
-          line2: get(payload, 'address.line2', ''),
-          postal_code: get(payload, 'address.postalCode', ''),
-          state: get(payload, 'address.state', ''),
+          city: customer.address.city,
+          country: customer.address.country,
+          line1: customer.address.line1,
+          line2: customer.address.line2,
+          postal_code: customer.address.postalCode,
+          state: customer.address.state,
         },
         metadata: {
-          client_reference_id: get(payload, 'clientReferenceId', ''),
+          client_reference_id: customer.clientReferenceId,
         },
       })
       .then((customers) => {
@@ -42,19 +27,19 @@ const create = async (payload: CreateCustomerPayload) => {
         return customers;
       });
   } catch (e) {
-    throw new Error(get(e, 'message', ''));
+    throw new Error((e as Error).message);
   }
 };
 
 // Create new Customer or if there is already customer with such clientReferenceId reuse
 // it and do not create new Customer. Avoiding create 2 customers with same clientReferenceId
-const createOrReuse = async (payload: CreateCustomerPayload) => {
+const createOrReuse = async (customer: CustomerType) => {
   try {
-    const customer = await findByClientReferenceId(payload.clientReferenceId);
-    if (customer) console.log(`Reuse Customer: ${customer.id}`);
-    return customer || (await create(payload));
+    const foundCustomer = await findByClientReferenceId(customer.clientReferenceId);
+    if (foundCustomer) console.log(`Reuse Customer: ${foundCustomer.id}`);
+    return foundCustomer || (await create(customer));
   } catch (e) {
-    throw new Error(get(e, 'message', ''));
+    throw new Error((e as Error).message);
   }
 };
 
@@ -63,7 +48,7 @@ const findByClientReferenceId = async (id: string) => {
   try {
     const result = await customers
       .search({
-        query: `metadata["client_reference_id"]:"${defaultTo(id, '')}"`,
+        query: `metadata["client_reference_id"]:"${id}"`,
       })
       .then((searchResults) => {
         console.log(`Find ${searchResults.data.length} Customer by clientReferenceId: ${id}`);
@@ -75,9 +60,9 @@ const findByClientReferenceId = async (id: string) => {
      * with same clientReferenceId. In theory there is no chance to get here more than 1 Customer.
      * Need to make decision what to do with rest customers
      */
-    return get(result, 'data[0]', undefined);
+    return result.data[0] || undefined;
   } catch (e) {
-    throw new Error(get(e, 'message', ''));
+    throw new Error((e as Error).message);
   }
 };
 
@@ -90,7 +75,7 @@ const deleteByCustomerId = async (id: string) => {
       return customer;
     });
   } catch (e) {
-    throw new Error(get(e, 'message', ''));
+    throw new Error((e as Error).message);
   }
 };
 

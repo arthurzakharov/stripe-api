@@ -1,66 +1,49 @@
-import { paymentIntents } from '../utils/stripe';
-import { get, defaultTo } from 'lodash';
-import { inCent } from '../utils/money';
+import { paymentIntents } from '@utils/stripe';
+import { inCent } from '@utils/money';
+import { type PaymentIntentType } from '@utils/types';
 
 // Create new PaymentIntent in EUR only.
-type CreatePaymentIntentPayload = {
-  amount: number;
-  customerId: string;
-  customerEmail: string;
-  paymentMethodTypes: string[];
-  clientReferenceId: string;
-  productId: string;
-};
-const create = async (payload: CreatePaymentIntentPayload) => {
+const create = async (paymentIntent: PaymentIntentType) => {
   try {
     return await paymentIntents
       .create({
-        amount: inCent(get(payload, 'amount', 0)),
+        amount: inCent(paymentIntent.amount),
         currency: 'eur',
-        customer: get(payload, 'customerId', ''),
-        receipt_email: get(payload, 'customerEmail', ''),
-        payment_method_types: get(payload, 'paymentMethodTypes', []),
-        description: get(payload, 'clientReferenceId', ''),
+        customer: paymentIntent.customerId,
+        receipt_email: paymentIntent.customerEmail,
+        payment_method_types: paymentIntent.paymentMethodTypes,
+        description: paymentIntent.clientReferenceId,
         metadata: {
-          product_id: get(payload, 'productId', ''),
-          client_reference_id: get(payload, 'clientReferenceId', ''),
+          product_id: paymentIntent.productId,
+          client_reference_id: paymentIntent.clientReferenceId,
         },
       })
-      .then((paymentIntent) => {
-        console.log(`Create new PaymentIntent ${paymentIntent.id} - ${get(payload, 'amount', 0)} EUR`);
-        return paymentIntent;
+      .then((newPaymentIntent) => {
+        console.log(`Create new PaymentIntent ${newPaymentIntent.id} - ${paymentIntent.amount} EUR`);
+        return newPaymentIntent;
       });
   } catch (e) {
-    throw new Error(get(e, 'message', ''));
+    throw new Error((e as Error).message);
   }
 };
 
-/**
- * Find PaymentIntent by id and update its payment_method_types.
- * @param {string} id - PaymentIntent id.
- * @param paymentMethodTypes - PaymentIntent payment method types.
- * @returns {Promise<Stripe.PaymentIntent>}
- */
+// Find PaymentIntent by id and update its payment_method_types.
 const updatePaymentMethodTypes = async (id: string, paymentMethodTypes: string[]) => {
   try {
     return await paymentIntents
       .update(id, {
-        payment_method_types: defaultTo(paymentMethodTypes, ['cards']),
+        payment_method_types: paymentMethodTypes,
       })
       .then((paymentIntent) => {
         console.log(`Update PaymentIntent ${paymentIntent.id} payment_method_types to [${paymentMethodTypes}]`);
         return paymentIntent;
       });
   } catch (e) {
-    throw new Error(get(e, 'message', ''));
+    throw new Error((e as Error).message);
   }
 };
 
-/**
- * Get PaymentIntent by its id or null
- * @param {string} id - PaymentIntent id
- * @returns {Promise<Stripe.PaymentIntent|null>}
- */
+// Get PaymentIntent by its id or null
 const findByPaymentIntentId = async (id: string) => {
   try {
     return await paymentIntents.retrieve(id);

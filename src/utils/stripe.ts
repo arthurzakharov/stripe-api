@@ -1,5 +1,5 @@
-import { SECRET_KEY } from './env';
 import Stripe from 'stripe';
+import { SECRET_KEY } from '@utils/env';
 
 const stripe = new Stripe(SECRET_KEY);
 

@@ -1,32 +1,25 @@
-import { type Request, type Response } from 'express';
+import { type Response } from 'express';
 import { CREATED, OK, BAD_REQUEST, NO_CONTENT } from 'http-status-codes';
-import { defaultTo, get } from 'lodash';
-import customerModel, { type CreateCustomerPayload } from '../models/customer';
-import paymentIntentModel from '../models/payment-intent';
-import { inCent, inEuro } from '../utils/money';
+import customerModel from '@models/customer';
+import paymentIntentModel from '@models/payment-intent';
+import { inCent, inEuro } from '@utils/money';
+import { type PostPaymentsRequest, type GetPaymentsRequest, type PatchPaymentsRequest } from '@utils/types';
 
 // Create new PaymentIntent and Customer. If customer with such clientReferenceId already exists reuse it to create new PaymentIntent
-type CreatePaymentIntent = {
-  payment: {
-    amount: number;
-    paymentMethodTypes: string[];
-  };
-  customer: CreateCustomerPayload;
-};
-const create = async (req: Request<void, void, CreatePaymentIntent>, res: Response) => {
-  const amount = get(req, 'body.payment.amount', 0);
-  const paymentMethodTypes = get(req, 'body.payment.paymentMethodTypes', []);
-  const productId = get(req, 'body.payment.productId', '');
-  const clientReferenceId = get(req, 'body.customer.clientReferenceId', '');
-  const name = get(req, 'body.customer.name', '');
-  const email = get(req, 'body.customer.email', '');
-  const phone = get(req, 'body.customer.phone', '');
-  const city = get(req, 'body.customer.address.city', '');
-  const country = get(req, 'body.customer.address.country', '');
-  const line1 = get(req, 'body.customer.address.line1', '');
-  const line2 = get(req, 'body.customer.address.line2', '');
-  const postalCode = get(req, 'body.customer.address.postalCode', '');
-  const state = get(req, 'body.customer.address.state', '');
+const create = async (req: PostPaymentsRequest, res: Response) => {
+  const amount = req.body.payment.amount;
+  const paymentMethodTypes = req.body.payment.paymentMethodTypes;
+  const productId = req.body.payment.productId;
+  const clientReferenceId = req.body.customer.clientReferenceId;
+  const name = req.body.customer.name;
+  const email = req.body.customer.email;
+  const phone = req.body.customer.phone;
+  const city = req.body.customer.address.city;
+  const country = req.body.customer.address.country;
+  const line1 = req.body.customer.address.line1;
+  const line2 = req.body.customer.address.line2;
+  const postalCode = req.body.customer.address.postalCode;
+  const state = req.body.customer.address.state;
   try {
     const customer = await customerModel.createOrReuse({
       clientReferenceId,
@@ -44,30 +37,26 @@ const create = async (req: Request<void, void, CreatePaymentIntent>, res: Respon
     });
     const paymentIntent = await paymentIntentModel.create({
       amount,
-      customerId: get(customer, 'id', ''),
-      customerEmail: defaultTo(customer.email, ''),
+      customerId: customer.id,
+      customerEmail: customer.email || '',
       paymentMethodTypes,
-      clientReferenceId: defaultTo(customer.description, ''),
+      clientReferenceId: customer.description || '',
       productId,
     });
     res.status(CREATED).json(paymentIntent);
   } catch (e) {
     res.status(BAD_REQUEST).json({
       message: 'Failed to create PaymentIntent',
-      error: get(e, 'message', ''),
+      error: (e as Error).message,
     });
   }
 };
 
 // Look for PaymentIntent by id and if price changed create new PaymentIntent for same Customer if
 // price is not changed return found PaymentIntent. If not PaymentIntent found return 404
-type GetPaymentIntentQuery = {
-  id: string;
-  amount: string;
-};
-const getPaymentIntentOrCreateNewIfAmountIsDifferent = async (req: Request<void, void, void, GetPaymentIntentQuery>, res: Response) => {
-  const id = get(req, 'query.id', '');
-  const amount = parseInt(get(req, 'query.amount', ''));
+const getPaymentIntentOrCreateNewIfAmountIsDifferent = async (req: GetPaymentsRequest, res: Response) => {
+  const id = req.query.id;
+  const amount = parseInt(req.query.amount);
   try {
     const paymentIntent = await paymentIntentModel.findByPaymentIntentId(id);
     if (paymentIntent) {
@@ -85,10 +74,10 @@ const getPaymentIntentOrCreateNewIfAmountIsDifferent = async (req: Request<void,
         const paymentIntentForNewAmount = await paymentIntentModel.create({
           amount,
           customerId: customer,
-          customerEmail: defaultTo(paymentIntent.receipt_email, ''),
-          paymentMethodTypes: get(paymentIntent, 'payment_method_types', []),
-          clientReferenceId: get(paymentIntent, 'metadata.client_reference_id', ''),
-          productId: get(paymentIntent, 'metadata.product_id', ''),
+          customerEmail: paymentIntent.receipt_email || '',
+          paymentMethodTypes: paymentIntent.payment_method_types,
+          clientReferenceId: paymentIntent.metadata.client_reference_id,
+          productId: paymentIntent.metadata.product_id,
         });
         console.log(`Price for Customer ${paymentIntent.customer} changed: ${inEuro(paymentIntent.amount)} EUR -> ${amount} EUR`);
         res.status(CREATED).json(paymentIntentForNewAmount);
@@ -100,22 +89,22 @@ const getPaymentIntentOrCreateNewIfAmountIsDifferent = async (req: Request<void,
   } catch (e) {
     res.status(BAD_REQUEST).json({
       message: 'Fail on get PaymentIntent',
-      error: get(e, 'message', ''),
+      error: (e as Error).message,
     });
   }
 };
 
 // Update PaymentIntents payment_method_types. Find PaymentIntent by id and update it
-const updateMethodTypes = async (req: Request, res: Response) => {
-  const id = get(req, 'body.id', '');
-  const paymentMethodTypes = get(req, 'body.types', []);
+const updateMethodTypes = async (req: PatchPaymentsRequest, res: Response) => {
+  const id = req.body.id;
+  const paymentMethodTypes = req.body.types;
   try {
     const paymentIntent = await paymentIntentModel.updatePaymentMethodTypes(id, paymentMethodTypes);
     res.status(OK).json(paymentIntent);
   } catch (e) {
     res.status(BAD_REQUEST).json({
       message: "Failed to update PaymentIntent' payment_method_types",
-      error: get(e, 'message', ''),
+      error: (e as Error).message,
     });
   }
 };
