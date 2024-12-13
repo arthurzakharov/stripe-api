@@ -1,12 +1,18 @@
-import { type Response } from 'express';
 import { CREATED, OK, BAD_REQUEST, NO_CONTENT } from 'http-status-codes';
 import customerModel from '@models/customer';
 import paymentIntentModel from '@models/payment-intent';
 import { inCent, inEuro } from '@utils/money';
-import { type PostPaymentsRequest, type GetPaymentsRequest, type PatchPaymentsRequest } from '@utils/types';
+import {
+  type PostPaymentsRequest,
+  type PostPaymentResponse,
+  type GetPaymentsRequest,
+  type GetPaymentResponse,
+  type PatchPaymentsRequest,
+  type PatchPaymentsResponse,
+} from '@utils/types';
 
 // Create new PaymentIntent and Customer. If customer with such clientReferenceId already exists reuse it to create new PaymentIntent
-const create = async (req: PostPaymentsRequest, res: Response) => {
+const create = async (req: PostPaymentsRequest, res: PostPaymentResponse) => {
   const amount = req.body.payment.amount;
   const paymentMethodTypes = req.body.payment.paymentMethodTypes;
   const productId = req.body.payment.productId;
@@ -43,9 +49,9 @@ const create = async (req: PostPaymentsRequest, res: Response) => {
       clientReferenceId: customer.description || '',
       productId,
     });
-    res.status(CREATED).json(paymentIntent);
+    res.json(paymentIntent);
   } catch (e) {
-    res.status(BAD_REQUEST).json({
+    res.json({
       message: 'Failed to create PaymentIntent',
       error: (e as Error).message,
     });
@@ -54,7 +60,7 @@ const create = async (req: PostPaymentsRequest, res: Response) => {
 
 // Look for PaymentIntent by id and if price changed create new PaymentIntent for same Customer if
 // price is not changed return found PaymentIntent. If not PaymentIntent found return 404
-const getPaymentIntentOrCreateNewIfAmountIsDifferent = async (req: GetPaymentsRequest, res: Response) => {
+const getPaymentIntentOrCreateNewIfAmountIsDifferent = async (req: GetPaymentsRequest, res: GetPaymentResponse) => {
   const id = req.query.id;
   const amount = parseInt(req.query.amount);
   try {
@@ -95,7 +101,7 @@ const getPaymentIntentOrCreateNewIfAmountIsDifferent = async (req: GetPaymentsRe
 };
 
 // Update PaymentIntents payment_method_types. Find PaymentIntent by id and update it
-const updateMethodTypes = async (req: PatchPaymentsRequest, res: Response) => {
+const updateMethodTypes = async (req: PatchPaymentsRequest, res: PatchPaymentsResponse) => {
   const id = req.body.id;
   const paymentMethodTypes = req.body.types;
   try {

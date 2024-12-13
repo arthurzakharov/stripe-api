@@ -1,4 +1,10 @@
-import { type Request } from 'express';
+import { type Request, type Response } from 'express';
+import { type Stripe } from 'stripe';
+
+type ErrorMessage = {
+  message: string;
+  error: string;
+};
 
 export type CustomerType = {
   clientReferenceId: string;
@@ -24,12 +30,24 @@ export type PaymentIntentType = {
   productId: string;
 };
 
+// PAYMENTS GET
+
+type GetPaymentResponseBody = Stripe.PaymentIntent | ErrorMessage;
+
+export type GetPaymentResponse = Response<GetPaymentResponseBody>;
+
 type GetPaymentsQuery = {
   id: string;
   amount: string;
 };
 
-export type GetPaymentsRequest = Request<void, void, void, GetPaymentsQuery>;
+export type GetPaymentsRequest = Request<void, GetPaymentResponseBody, void, GetPaymentsQuery>;
+
+// PAYMENTS POST
+
+type PostPaymentResponseBody = Stripe.PaymentIntent | ErrorMessage;
+
+export type PostPaymentResponse = Response<PostPaymentResponseBody>;
 
 type PostPaymentsData = {
   payment: {
@@ -40,11 +58,17 @@ type PostPaymentsData = {
   customer: CustomerType;
 };
 
-export type PostPaymentsRequest = Request<void, void, PostPaymentsData>;
+export type PostPaymentsRequest = Request<void, PostPaymentResponseBody, PostPaymentsData>;
 
 type PatchPaymentsData = {
   id: string;
   types: string[];
 };
 
-export type PatchPaymentsRequest = Request<void, void, PatchPaymentsData>;
+// PAYMENTS PATCH
+
+type PatchPaymentsResponseBody = Stripe.PaymentIntent | ErrorMessage;
+
+export type PatchPaymentsResponse = Response<PatchPaymentsResponseBody>;
+
+export type PatchPaymentsRequest = Request<void, PatchPaymentsResponseBody, PatchPaymentsData>;
